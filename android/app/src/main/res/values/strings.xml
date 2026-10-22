@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Islam For Everyone</string>
+    <string name="title_activity_main">Islam For Everyone</string>
+    <string name="package_name">com.islamforeveryone.app</string>
+    <string name="custom_url_scheme">com.islamforeveryone.app</string>
+</resources>
