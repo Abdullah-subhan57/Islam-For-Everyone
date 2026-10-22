@@ -103,7 +103,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const THEME_KEY = 'islam360_theme';
+const THEME_KEY = 'islam360_theme_v2';
 const LANG_KEY = 'islam360_lang';
 const BOOKMARKS_KEY = 'islam360_bookmarks';
 const PROFILE_KEY = 'islam360_user_profile';

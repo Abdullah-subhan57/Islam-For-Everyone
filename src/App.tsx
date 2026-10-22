@@ -38,6 +38,7 @@ import { AccountTrackerPage } from './pages/AccountTrackerPage';
 import { AIAssistantPage } from './pages/AIAssistantPage';
 import { IbadatGuidePage } from './pages/IbadatGuidePage';
 import { AuthGate } from './components/AuthGate';
+import { SplashScreen } from './components/SplashScreen';
 
 const PrayerAlertScheduler: React.FC = () => {
   const { userProfile } = useApp();
@@ -293,6 +294,14 @@ const FloatingTasbih: React.FC = () => {
 
 const MainLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    try {
+      return sessionStorage.getItem('islam360_welcome_seen') !== 'true';
+    } catch (error) {
+      console.error('Unable to read welcome screen preference:', error);
+      return true;
+    }
+  });
   const {
     activePage,
     theme,
@@ -309,6 +318,21 @@ const MainLayout: React.FC = () => {
     authDataReady,
     authUser
   } = useApp();
+
+  if (showWelcome) {
+    return (
+      <SplashScreen
+        onContinue={() => {
+          try {
+            sessionStorage.setItem('islam360_welcome_seen', 'true');
+          } catch (error) {
+            console.error('Unable to save welcome screen preference:', error);
+          }
+          setShowWelcome(false);
+        }}
+      />
+    );
+  }
 
   if (authConfigured && (!authReady || !authUser || !authDataReady)) return <AuthGate />;
 
