@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-quran: 'Scheherazade New', 'Amiri', serif;
+    --font-nastaliq: 'Noto Nastaliq Urdu', serif;
+    --font-title: 'Cinzel', serif;
+  }
+}
+
+.font-quran {
+  font-family: var(--font-quran);
+}
+
+.font-nastaliq {
+  font-family: var(--font-nastaliq);
+  line-height: 2.2;
+}
+
+.font-title {
+  font-family: var(--font-title);
+}
+
+/* Islamic Arch & Mihrab Styles */
+.islamic-arch {
+  border-top-left-radius: 9999px;
+  border-top-right-radius: 9999px;
+}
+
+/* Subtle Geometric Pattern */
+.bg-arabesque-light {
+  background-color: #faf9f6;
+  background-image: radial-gradient(ellipse at top, rgba(16, 94, 72, 0.055), transparent 58%);
+}
+
+.bg-arabesque-dark {
+  background-color: #0F172A;
+  background-image: radial-gradient(ellipse at top, rgba(16, 94, 72, 0.13), transparent 58%);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Custom scrollbar for Quran / Hadith reading */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.quiz-certificate {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .quiz-certificate,
+  .quiz-certificate * {
+    visibility: visible !important;
+  }
+
+  .quiz-certificate {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 24px;
+    background: white;
+  }
+
+  .certificate-frame {
+    display: flex;
+    min-height: 85vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    border: 8px double #b8860b;
+    color: #064e3b;
+    text-align: center;
+  }
+
+  .certificate-brand {
+    color: #b8860b;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .certificate-frame h1 {
+    font-size: 36px;
+    font-weight: 700;
+  }
+
+  .certificate-frame h2 {
+    border-bottom: 2px solid #b8860b;
+    padding: 0 48px 8px;
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  .certificate-frame strong {
+    font-size: 22px;
+  }
+}
