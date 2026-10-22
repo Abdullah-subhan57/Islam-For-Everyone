@@ -2,13 +2,18 @@ import React, { FormEvent, useState } from 'react';
 import { Github, LoaderCircle, Mail } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export const AuthGate: React.FC = () => {
+interface AuthGateProps {
+  onContinueAsGuest?: () => void;
+}
+
+export const AuthGate: React.FC<AuthGateProps> = ({ onContinueAsGuest }) => {
   const {
     language,
     setLanguage,
     authReady,
     authDataReady,
     authUser,
+    authConfigured,
     authError,
     signInWithGoogle,
     requestEmailCode,
@@ -105,6 +110,21 @@ export const AuthGate: React.FC = () => {
               className="classic-secondary-button w-full rounded-xl px-4 py-2 font-semibold"
             >
               {isUrdu ? 'لاگ آؤٹ' : 'Sign out'}
+            </button>
+          </div>
+        ) : !authConfigured ? (
+          <div className="space-y-4">
+            <p className="rounded-xl border border-teal-100 bg-teal-50/80 px-4 py-3 text-sm leading-6 text-teal-950">
+              {isUrdu
+                ? 'اکاؤنٹ سائن اِن ابھی ترتیب نہیں دیا گیا۔ آپ مہمان کے طور پر ایپ استعمال کر سکتے ہیں؛ اس ڈیوائس کا ڈیٹا مقامی طور پر محفوظ ہوگا۔'
+                : 'Account sign-in has not been configured yet. You can use the app as a guest; progress will be saved on this device.'}
+            </p>
+            <button
+              type="button"
+              onClick={onContinueAsGuest}
+              className="classic-primary-button flex min-h-12 w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold"
+            >
+              {isUrdu ? 'مہمان کے طور پر جاری رکھیں' : 'Continue as guest'}
             </button>
           </div>
         ) : (

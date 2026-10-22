@@ -294,6 +294,7 @@ const FloatingTasbih: React.FC = () => {
 
 const MainLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [continueAsGuest, setContinueAsGuest] = useState(false);
   const [showWelcome, setShowWelcome] = useState(() => {
     try {
       return sessionStorage.getItem('islam360_welcome_seen') !== 'true';
@@ -334,7 +335,13 @@ const MainLayout: React.FC = () => {
     );
   }
 
-  if (authConfigured && (!authReady || !authUser || !authDataReady)) return <AuthGate />;
+  if (!continueAsGuest && (!authConfigured || !authReady || !authUser || !authDataReady)) {
+    return (
+      <AuthGate
+        onContinueAsGuest={!authConfigured ? () => setContinueAsGuest(true) : undefined}
+      />
+    );
+  }
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-300 ${theme === 'midnight' ? 'bg-arabesque-dark' : 'bg-arabesque-light'}`}>
