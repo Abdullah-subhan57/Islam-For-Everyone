@@ -127,16 +127,16 @@ export const DuasAzkarPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-24">
       {/* Page Header */}
-      <div className="rounded-3xl bg-gradient-to-br from-rose-950 via-emerald-950 to-teal-950 text-white p-6 sm:p-8 shadow-xl border border-amber-400/30">
+      <div className="rounded-3xl bg-gradient-to-br from-rose-50 via-white to-emerald-50 text-slate-900 p-6 sm:p-8 shadow-sm border border-emerald-200">
         <div className="max-w-2xl space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-amber-300 text-xs font-semibold border border-amber-400/30">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-emerald-800 text-xs font-semibold border border-emerald-200">
             <HeartHandshake className="w-3.5 h-3.5" />
             <span>{language === 'ur' ? 'حصن المسلم' : 'Fortress of the Muslim'}</span>
           </div>
-          <h2 className="font-title text-2xl sm:text-3xl font-extrabold text-amber-200">
+          <h2 className="font-title text-2xl sm:text-3xl font-extrabold text-emerald-950">
             {t.duas}
           </h2>
-          <p className="text-xs sm:text-sm text-emerald-200/90 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             {language === 'ur'
               ? 'قرآن حکیم اور صحیح احادیث مبارکہ سے ثابت شدہ روزمرہ مسنون دعائیں، صبح و شام کے اذکار اور حفاظت کی دعائیں۔'
               : 'Daily authentic supplications and morning/evening azkar from Hisn al-Muslim with interactive repetition counters.'}

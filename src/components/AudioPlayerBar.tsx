@@ -1,21 +1,108 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Play, Pause, Square, Volume2, FastForward } from 'lucide-react';
+import { MediaSession } from '@capgo/capacitor-media-session';
 import { useApp } from '../context/AppContext';
 import { QuranDataProvider } from '../services/quranData';
 
 export const AudioPlayerBar: React.FC = () => {
   const { audioState, pauseAudio, resumeAudio, stopAudio, setPlaybackSpeed, language } = useApp();
-
-  if (!audioState.currentAyah || !audioState.currentSurahNum) {
-    return null;
-  }
-
-  const surahMeta = QuranDataProvider.getSurahMeta(audioState.currentSurahNum);
+  const controlsRef = useRef({ pauseAudio, resumeAudio, stopAudio });
+  controlsRef.current = { pauseAudio, resumeAudio, stopAudio };
+  const audioElement = audioState.audioElement;
+  const audioElementRef = useRef(audioElement);
+  audioElementRef.current = audioElement;
+  const currentAyah = audioState.currentAyah;
+  const surahMeta = audioState.currentSurahNum
+    ? QuranDataProvider.getSurahMeta(audioState.currentSurahNum)
+    : null;
   const surahName = surahMeta
     ? language === 'ur'
       ? surahMeta.nameUrdu
       : surahMeta.nameEnglish
-    : `Surah ${audioState.currentSurahNum}`;
+    : audioState.currentSurahNum
+      ? `Surah ${audioState.currentSurahNum}`
+      : '';
+
+  useEffect(() => {
+    void Promise.all([
+      MediaSession.setMetadata({
+        title: currentAyah ? `${surahName} · Ayah ${currentAyah.numberInSurah}` : 'Quran Recitation',
+        artist: 'Mishary Rashid Alafasy',
+        album: 'Islam for Everyone',
+        artwork: [{ src: new URL('/favicon.svg', window.location.origin).href, sizes: '64x64', type: 'image/svg+xml' }]
+      }),
+      MediaSession.setPlaybackState({
+        playbackState: currentAyah ? (audioState.isPlaying ? 'playing' : 'paused') : 'none'
+      })
+    ]).catch((error: unknown) => {
+      console.error('Unable to update lock-screen recitation controls:', error);
+    });
+  }, [currentAyah, audioState.isPlaying, language, surahName]);
+
+  useEffect(() => {
+    if (!audioElement) return;
+    let lastPositionUpdate = 0;
+    const updatePosition = (force = false) => {
+      const now = Date.now();
+      if (!force && now - lastPositionUpdate < 5_000) return;
+      if (!Number.isFinite(audioElement.duration) || audioElement.duration <= 0) return;
+      lastPositionUpdate = now;
+      void MediaSession.setPositionState({
+        duration: audioElement.duration,
+        position: Math.min(audioElement.currentTime, audioElement.duration),
+        playbackRate: audioElement.playbackRate
+      }).catch((error: unknown) => {
+        console.error('Unable to update lock-screen recitation position:', error);
+      });
+    };
+    const handlePositionChange = () => updatePosition();
+    updatePosition(true);
+    audioElement.addEventListener('loadedmetadata', handlePositionChange);
+    audioElement.addEventListener('timeupdate', handlePositionChange);
+    audioElement.addEventListener('seeked', handlePositionChange);
+    audioElement.addEventListener('ratechange', handlePositionChange);
+    return () => {
+      audioElement.removeEventListener('loadedmetadata', handlePositionChange);
+      audioElement.removeEventListener('timeupdate', handlePositionChange);
+      audioElement.removeEventListener('seeked', handlePositionChange);
+      audioElement.removeEventListener('ratechange', handlePositionChange);
+    };
+  }, [audioElement, audioState.isPlaying, audioState.playbackSpeed]);
+
+  useEffect(() => {
+    const registerActions = async () => {
+      await Promise.all([
+        MediaSession.setActionHandler({ action: 'play' }, () => controlsRef.current.resumeAudio()),
+        MediaSession.setActionHandler({ action: 'pause' }, () => controlsRef.current.pauseAudio()),
+        MediaSession.setActionHandler({ action: 'stop' }, () => controlsRef.current.stopAudio()),
+        MediaSession.setActionHandler({ action: 'seekto' }, (details) => {
+          const element = audioElementRef.current;
+          if (element && typeof details.seekTime === 'number') {
+            element.currentTime = Math.min(Math.max(details.seekTime, 0), element.duration || 0);
+          }
+        })
+      ]);
+    };
+    void registerActions().catch((error: unknown) => {
+      console.error('Unable to register lock-screen recitation controls:', error);
+    });
+
+    return () => {
+      void Promise.all([
+        MediaSession.setPlaybackState({ playbackState: 'none' }),
+        MediaSession.setActionHandler({ action: 'play' }, null),
+        MediaSession.setActionHandler({ action: 'pause' }, null),
+        MediaSession.setActionHandler({ action: 'stop' }, null),
+        MediaSession.setActionHandler({ action: 'seekto' }, null)
+      ]).catch((error: unknown) => {
+        console.error('Unable to clear lock-screen recitation controls:', error);
+      });
+    };
+  }, []);
+
+  if (!currentAyah || !audioState.currentSurahNum) {
+    return null;
+  }
 
   const nextSpeed =
     audioState.playbackSpeed === 1.0
@@ -39,7 +126,7 @@ export const AudioPlayerBar: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm text-amber-300 truncate">{surahName}</span>
               <span className="text-xs bg-emerald-800 text-amber-200 px-2 py-0.5 rounded-full border border-emerald-700">
-                Ayah {audioState.currentAyah.numberInSurah}
+              Ayah {currentAyah.numberInSurah}
               </span>
             </div>
             <p className="text-[11px] text-emerald-300/80 truncate">

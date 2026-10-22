@@ -19,6 +19,12 @@ import { useTranslation } from '../services/translations';
 import { PrayerStatus } from '../types';
 import { PrayerTimesService, MAJOR_CITIES } from '../services/prayerTimes';
 import { TasbihAudioFeedback } from '../services/tasbihPresets';
+import {
+  cancelPrayerNotifications,
+  requestPrayerNotificationPermission,
+  schedulePrayerNotifications,
+  scheduleTestPrayerNotification
+} from '../services/prayerNotifications';
 
 export const AccountTrackerPage: React.FC = () => {
   const {
@@ -52,6 +58,7 @@ export const AccountTrackerPage: React.FC = () => {
 
   const [notificationTestStatus, setNotificationTestStatus] = useState<string | null>(null);
   const [profileName, setProfileName] = useState(userProfile.name);
+  const [profileUsername, setProfileUsername] = useState(userProfile.username ?? '');
   const [profileEmail, setProfileEmail] = useState(userProfile.email);
   const [profileCity, setProfileCity] = useState(userProfile.city);
   const [profileSaved, setProfileSaved] = useState(false);
@@ -75,34 +82,47 @@ export const AccountTrackerPage: React.FC = () => {
     audio?.addEventListener('error', () => setNotificationTestStatus('Adhan audio could not be loaded. Check your connection.'), { once: true });
     audio?.addEventListener('playerror', () => setNotificationTestStatus('The browser blocked Adhan audio playback. Press Test Adhan again.'), { once: true });
 
-    if ('Notification' in window) {
-      void Notification.requestPermission().then((permission) => {
-        if (permission === 'granted') {
-          new Notification('Islam for Everyone: Upcoming Prayer Alert', {
-            body: 'Only 15 minutes remaining until the next prayer. Prepare your wudhu.',
-            icon: '/favicon.ico'
-          });
-        } else {
-          setNotificationTestStatus('Browser notification permission was not granted.');
-        }
-      }).catch((error: unknown) => {
-        console.error('Unable to request notification permission:', error);
-        setNotificationTestStatus('Could not request browser notification permission.');
-      });
-    }
+    void scheduleTestPrayerNotification(language).then(() => {
+      setNotificationTestStatus(language === 'ur'
+        ? 'اذان آڈیو اور نوٹیفکیشن ٹیسٹ شروع ہو گیا۔'
+        : 'Adhan audio and notification test started.');
+    }).catch((error: unknown) => {
+      console.error('Unable to send a test prayer notification:', error);
+      setNotificationTestStatus(error instanceof Error
+        ? error.message
+        : 'Could not send a test notification.');
+    });
 
     window.setTimeout(() => setNotificationTestStatus(null), 6000);
   };
 
   const handleTogglePrayerAlerts = async () => {
-    if (!userProfile.preAdhanNotification && 'Notification' in window) {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        setNotificationTestStatus('Allow browser notifications to enable prayer reminders.');
+    try {
+      if (userProfile.preAdhanNotification) {
+        await cancelPrayerNotifications();
+        updateUserProfile({ preAdhanNotification: false });
+        setNotificationTestStatus(language === 'ur' ? 'نماز کی یاد دہانیاں بند ہیں۔' : 'Prayer reminders are off.');
         return;
       }
+
+      const permissionGranted = await requestPrayerNotificationPermission();
+      if (!permissionGranted) {
+        setNotificationTestStatus(language === 'ur'
+          ? 'نماز کی یاد دہانیوں کے لیے نوٹیفکیشن کی اجازت دیں۔'
+          : 'Allow notifications to enable prayer reminders.');
+        return;
+      }
+      const count = await schedulePrayerNotifications(userProfile, language);
+      updateUserProfile({ preAdhanNotification: true });
+      setNotificationTestStatus(language === 'ur'
+        ? `اگلے چھ دنوں کے لیے ${count} موبائل یاد دہانیاں مقرر ہو گئیں۔`
+        : `${count} mobile reminders scheduled for the next six days.`);
+    } catch (error) {
+      console.error('Unable to update prayer reminder schedule:', error);
+      setNotificationTestStatus(error instanceof Error
+        ? error.message
+        : 'Could not update prayer notifications.');
     }
-    updateUserProfile({ preAdhanNotification: !userProfile.preAdhanNotification });
   };
 
   const prayers = [
@@ -160,10 +180,10 @@ export const AccountTrackerPage: React.FC = () => {
       )}
 
       {/* User Header Profile Card */}
-      <div className="rounded-3xl bg-gradient-to-br from-emerald-950 via-teal-950 to-emerald-900 text-white p-6 sm:p-8 shadow-xl border border-amber-400/30">
+      <div className="rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-teal-50 text-slate-900 p-6 sm:p-8 shadow-sm border border-emerald-200">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="relative">
-            <label className="group relative block h-20 w-20 cursor-pointer overflow-hidden rounded-2xl border-2 border-amber-300 bg-amber-500 text-emerald-950 shadow-xl">
+            <label className="group relative block h-20 w-20 cursor-pointer overflow-hidden rounded-2xl border-2 border-emerald-300 bg-emerald-100 text-emerald-950 shadow-sm">
               {userProfile.avatarUrl ? (
                 <img src={userProfile.avatarUrl} alt={`${userProfile.name} profile`} className="h-full w-full object-cover" />
               ) : (
@@ -219,6 +239,7 @@ export const AccountTrackerPage: React.FC = () => {
               const selectedCity = MAJOR_CITIES.find((city) => city.name === profileCity);
               updateUserProfile({
                 name: profileName.trim() || 'Muslim',
+                username: profileUsername.trim(),
                 email: profileEmail.trim(),
                 city: profileCity,
                 ...(selectedCity ? {
@@ -240,10 +261,14 @@ export const AccountTrackerPage: React.FC = () => {
                 {language === 'ur' ? `شمولیت: ${userProfile.joinedDate}` : `Member since ${userProfile.joinedDate}`}
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
                 {language === 'ur' ? 'نام' : 'Name'}
                 <input value={profileName} onChange={(event) => setProfileName(event.target.value)} className="w-full rounded-xl border border-stone-200 dark:border-slate-700 bg-stone-50 dark:bg-slate-900 px-3 py-2 text-sm" />
+              </label>
+              <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                {language === 'ur' ? 'صارف نام' : 'Username'}
+                <input value={profileUsername} onChange={(event) => setProfileUsername(event.target.value.replace(/\s/g, ''))} maxLength={32} className="w-full rounded-xl border border-stone-200 dark:border-slate-700 bg-stone-50 dark:bg-slate-900 px-3 py-2 text-sm" />
               </label>
               <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
                 Email

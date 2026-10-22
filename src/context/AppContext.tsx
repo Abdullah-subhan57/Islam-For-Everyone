@@ -88,7 +88,7 @@ interface AppContextType {
   authUser: AuthUser | null;
   authError: string | null;
   signInWithGoogle: () => Promise<void>;
-  requestEmailCode: (email: string) => Promise<void>;
+  requestEmailCode: (email: string, username: string) => Promise<void>;
   verifyEmailCode: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
 
@@ -103,7 +103,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const THEME_KEY = 'islam360_theme_v2';
+const THEME_KEY = 'islam360_theme_v3';
 const LANG_KEY = 'islam360_lang';
 const BOOKMARKS_KEY = 'islam360_bookmarks';
 const PROFILE_KEY = 'islam360_user_profile';
@@ -219,16 +219,7 @@ const createDefaultProfile = (id: string, name: string, email: string, avatarUrl
 });
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Theme state: 'emerald' (warm light) | 'midnight' (dark) | 'terracotta'
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    try {
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved === 'emerald' || saved === 'midnight' || saved === 'terracotta') return saved;
-      return 'emerald';
-    } catch {
-      return 'emerald';
-    }
-  });
+  const [theme, setThemeState] = useState<ThemeMode>('emerald');
 
   // Language state
   const [language, setLanguageState] = useState<Language>(() => {
@@ -447,6 +438,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ? metadata.full_name
           : typeof metadata.name === 'string'
             ? metadata.name
+            : typeof metadata.username === 'string'
+              ? metadata.username
             : user.email?.split('@')[0] ?? 'Muslim';
         const avatarUrl = typeof metadata.avatar_url === 'string'
           ? metadata.avatar_url
@@ -474,6 +467,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...accountState,
         userProfile: {
           ...accountState.userProfile,
+          username: accountState.userProfile.username ??
+            (typeof user.user_metadata.username === 'string' ? user.user_metadata.username : undefined),
+          name: accountState.userProfile.name === 'Muslim Seeker' &&
+            typeof user.user_metadata.full_name === 'string'
+            ? user.user_metadata.full_name
+            : accountState.userProfile.name,
           id: user.id,
           email: user.email ?? accountState.userProfile.email
         }
@@ -535,11 +534,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       localStorage.setItem(THEME_KEY, theme);
-      if (theme === 'midnight') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
     } catch {}
   }, [theme]);
 
@@ -553,11 +549,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [language]);
 
   const setTheme = (mode: ThemeMode) => {
-    setThemeState(mode);
+    void mode;
+    setThemeState('emerald');
   };
 
   const toggleTheme = () => {
-    setThemeState(prev => (prev === 'midnight' ? 'emerald' : 'midnight'));
+    setThemeState('emerald');
   };
 
   const setLanguage = (lang: Language) => {
@@ -577,14 +574,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const requestEmailCode = async (email: string) => {
+  const requestEmailCode = async (email: string, username: string) => {
     if (!supabase) throw new Error('Supabase authentication is not configured.');
     setAuthError(null);
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: window.location.origin
+        emailRedirectTo: window.location.origin,
+        data: {
+          username: username.trim(),
+          full_name: username.trim()
+        }
       }
     });
     if (error) {

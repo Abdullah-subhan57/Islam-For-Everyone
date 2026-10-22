@@ -21,6 +21,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ onContinueAsGuest }) => {
     signOut
   } = useApp();
   const isUrdu = language === 'ur';
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
@@ -46,7 +47,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ onContinueAsGuest }) => {
       if (codeSent) {
         await verifyEmailCode(email, code);
       } else {
-        await requestEmailCode(email);
+        await requestEmailCode(email, username);
         setCodeSent(true);
       }
     } catch (error) {
@@ -146,6 +147,23 @@ export const AuthGate: React.FC<AuthGateProps> = ({ onContinueAsGuest }) => {
             </div>
 
             <form onSubmit={(event) => void handleEmailSubmit(event)} className="space-y-3">
+              {!codeSent && (
+                <label className="block space-y-1 text-xs font-semibold text-slate-600">
+                  {isUrdu ? 'صارف نام' : 'Username'}
+                  <input
+                    type="text"
+                    required
+                    minLength={3}
+                    maxLength={32}
+                    autoComplete="username"
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value.replace(/\s/g, ''))}
+                    disabled={busy}
+                    className="classic-input w-full rounded-xl px-3 py-3 text-sm text-slate-900"
+                    placeholder="yourname"
+                  />
+                </label>
+              )}
               <label className="block space-y-1 text-xs font-semibold text-slate-600">
                 {isUrdu ? 'ای میل' : 'Email address'}
                 <span className="relative block">
@@ -186,7 +204,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ onContinueAsGuest }) => {
                 {busy && <LoaderCircle className="h-4 w-4 animate-spin" />}
                 {codeSent
                   ? (isUrdu ? 'کوڈ کی تصدیق کریں' : 'Verify code and sign in')
-                  : (isUrdu ? 'تصدیقی کوڈ بھیجیں' : 'Send verification code')}
+                  : (isUrdu ? 'اکاؤنٹ بنائیں اور OTP بھیجیں' : 'Create account and send OTP')}
               </button>
               {codeSent && (
                 <button

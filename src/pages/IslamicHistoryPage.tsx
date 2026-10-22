@@ -49,23 +49,23 @@ export const IslamicHistoryPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-24">
       {/* Header Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-amber-950 via-emerald-950 to-teal-950 text-white p-6 sm:p-8 shadow-xl border border-amber-400/30">
+      <div className="rounded-3xl bg-gradient-to-br from-amber-50 via-white to-emerald-50 text-slate-900 p-6 sm:p-8 shadow-sm border border-emerald-200">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold border border-amber-400/30">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-emerald-800 text-xs font-semibold border border-emerald-200">
               <Crown className="w-3.5 h-3.5" />
               <span>{language === 'ur' ? 'قصص الانبیاء و تاریخِ خلافت' : 'Prophetic Legacies & Caliphate History'}</span>
             </div>
-            <h2 className="font-title text-2xl sm:text-3xl font-extrabold text-amber-200">
+            <h2 className="font-title text-2xl sm:text-3xl font-extrabold text-emerald-950">
               {language === 'ur' ? 'تاریخِ اسلام و اسوۂ صالحین' : 'Islamic History & Righteous Forebears'}
             </h2>
-            <p className="text-xs sm:text-sm text-emerald-200/90 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               Timelines of the noble Prophets and Khulafa-e-Rashideen with historical achievements, character, and spiritual lessons.
             </p>
           </div>
 
           {/* Sub-tab switcher */}
-          <div className="flex items-center bg-emerald-900/60 p-1 rounded-2xl border border-amber-400/30">
+          <div className="flex items-center bg-white p-1 rounded-2xl border border-emerald-200">
             <button
               onClick={() => {
                 setActiveTab('prophets');
@@ -73,8 +73,8 @@ export const IslamicHistoryPage: React.FC = () => {
               }}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'prophets'
-                  ? 'bg-amber-400 text-emerald-950 shadow-md'
-                  : 'text-amber-200 hover:text-white'
+                  ? 'bg-emerald-700 text-white shadow-sm'
+                  : 'text-emerald-800 hover:bg-emerald-50'
               }`}
             >
               {language === 'ur' ? 'انبیاء کرامؑ' : 'Prophets (AS)'}

@@ -1,22 +1,27 @@
 import React, { useEffect } from 'react';
 import {
-  Home,
-  BookOpen,
+  Award,
   BookMarked,
+  BookOpen,
+  Bookmark,
+  Bot,
+  Calendar,
   Clock,
   Compass,
-  HeartHandshake,
-  Repeat,
+  Github,
   GraduationCap,
-  Calendar,
-  Shield,
-  UserCheck,
-  Bot,
   HandHeart,
-  X
+  HeartHandshake,
+  HelpCircle,
+  Home,
+  Languages,
+  Repeat,
+  Search,
+  Shield,
+  Upload,
+  UserRound
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { useTranslation } from '../services/translations';
 import { PageId } from '../types';
 
 interface NavItem {
@@ -30,16 +35,17 @@ export const NAVIGATION_ITEMS: NavItem[] = [
   { id: 'home', labelEn: 'Home', labelUr: 'مرکزی', icon: Home },
   { id: 'quran', labelEn: 'Quran', labelUr: 'قرآن', icon: BookOpen },
   { id: 'hadith', labelEn: 'Hadith', labelUr: 'حدیث', icon: BookMarked },
-  { id: 'prayer', labelEn: 'Prayers', labelUr: 'نماز', icon: Clock },
-  { id: 'account', labelEn: 'Salah Tracker', labelUr: 'صلوٰۃ', icon: UserCheck },
-  { id: 'calendar', labelEn: 'Calendar', labelUr: 'کیلنڈر', icon: Calendar },
-  { id: 'history', labelEn: 'History', labelUr: 'تاریخ', icon: Shield },
-  { id: 'assistant', labelEn: 'AI Assistant', labelUr: 'اے آئی معاون', icon: Bot },
+  { id: 'prayer', labelEn: 'Prayer times', labelUr: 'اوقاتِ نماز', icon: Clock },
+  { id: 'account', labelEn: 'Salah & account', labelUr: 'صلوٰۃ اور اکاؤنٹ', icon: UserRound },
   { id: 'qibla', labelEn: 'Qibla', labelUr: 'قبلہ', icon: Compass },
-  { id: 'duas', labelEn: 'Duas', labelUr: 'ادعیہ', icon: HeartHandshake },
-  { id: 'tasbih', labelEn: 'Tasbih', labelUr: 'تسبیح', icon: Repeat },
-  { id: 'quiz', labelEn: 'Quiz & 99', labelUr: 'کوئز', icon: GraduationCap },
-  { id: 'ibadat', labelEn: 'Ibadat Guide', labelUr: 'عبادات گائیڈ', icon: HandHeart }
+  { id: 'duas', labelEn: 'Duas & Azkar', labelUr: 'دعائیں اور اذکار', icon: HeartHandshake },
+  { id: 'tasbih', labelEn: 'Digital Tasbih', labelUr: 'ڈیجیٹل تسبیح', icon: Repeat },
+  { id: 'quiz', labelEn: 'Quiz', labelUr: 'کوئز', icon: GraduationCap },
+  { id: 'names99', labelEn: '99 Names', labelUr: 'اسمائے حسنیٰ', icon: Award },
+  { id: 'calendar', labelEn: 'Islamic calendar', labelUr: 'اسلامی کیلنڈر', icon: Calendar },
+  { id: 'history', labelEn: 'Islamic history', labelUr: 'اسلامی تاریخ', icon: Shield },
+  { id: 'assistant', labelEn: 'AI assistant', labelUr: 'اے آئی معاون', icon: Bot },
+  { id: 'ibadat', labelEn: 'Ibadat guide', labelUr: 'عبادات گائیڈ', icon: HandHeart }
 ];
 
 interface NavigationProps {
@@ -48,7 +54,17 @@ interface NavigationProps {
 }
 
 export const Navigation: React.FC<NavigationProps> = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
-  const { activePage, setActivePage, language } = useApp();
+  const {
+    activePage,
+    setActivePage,
+    language,
+    setLanguage,
+    setIsSearchOpen,
+    setIsBookmarksOpen,
+    setIsDatasetModalOpen,
+    userProfile
+  } = useApp();
+  const isUrdu = language === 'ur';
 
   useEffect(() => {
     if (!isMobileMenuOpen) return;
@@ -69,103 +85,135 @@ export const Navigation: React.FC<NavigationProps> = ({ isMobileMenuOpen, onClos
     onCloseMobileMenu();
   };
 
+  const closeAndRun = (action: () => void) => {
+    action();
+    onCloseMobileMenu();
+  };
+
+  const openGuide = () => {
+    window.dispatchEvent(new Event('islam360:open-guide'));
+  };
+
+  const utilityButtonClass = 'flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900';
+
   return (
-    <>
-      {/* Desktop Main Navigation Tabs */}
-      <nav className="hidden lg:block border-b border-amber-200/50 dark:border-amber-900/30 bg-[#F7FBFF] dark:bg-[#0B1424]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-start space-x-1 rtl:space-x-reverse overflow-x-auto py-2 no-scrollbar">
-            {NAVIGATION_ITEMS.map((item) => {
-              const Icon = item.icon;
-              const isActive = activePage === item.id;
-              const label = language === 'ur' ? item.labelUr : item.labelEn;
-
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => selectPage(item.id)}
-                  className={`group relative flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-t-xl transition-all duration-200 shrink-0 ${
-                    isActive
-                      ? 'bg-emerald-900 text-amber-300 shadow-md border-t-2 border-amber-400'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-emerald-900 dark:hover:text-amber-300 hover:bg-emerald-50/60 dark:hover:bg-slate-800/50'
-                  }`}
-                >
-                  <Icon
-                    className={`w-3.5 h-3.5 transition-transform group-hover:scale-110 ${
-                      isActive ? 'text-amber-300' : 'text-slate-500 dark:text-slate-400'
-                    }`}
-                  />
-                  <span className={language === 'ur' ? 'font-nastaliq text-xs' : ''}>{label}</span>
-                  {isActive && (
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-amber-400"></div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </nav>
-
-      <div className={`lg:hidden fixed inset-0 z-50 ${isMobileMenuOpen ? '' : 'pointer-events-none invisible'}`}>
-        <button
-          type="button"
-          onClick={onCloseMobileMenu}
-          aria-label={language === 'ur' ? 'مینو بند کریں' : 'Close navigation menu'}
-          tabIndex={isMobileMenuOpen ? 0 : -1}
-          className={`absolute inset-0 h-full w-full bg-slate-950/50 backdrop-blur-sm transition-opacity duration-200 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
-        />
-        <nav
-          id="mobile-navigation"
-          aria-label={language === 'ur' ? 'مرکزی نیویگیشن' : 'Main navigation'}
-          aria-hidden={!isMobileMenuOpen}
-          className={`absolute top-0 flex h-full w-[min(21rem,86vw)] flex-col overflow-y-auto bg-[#F7FBFF] p-4 shadow-2xl transition-transform duration-200 dark:bg-[#0B1424] ${language === 'ur' ? 'left-0 border-r' : 'right-0 border-l'} border-amber-200/70 dark:border-amber-900/50 ${isMobileMenuOpen ? 'translate-x-0' : language === 'ur' ? '-translate-x-full' : 'translate-x-full'}`}
-        >
-          <div className="mb-3 flex items-center justify-between border-b border-amber-200/70 pb-3 dark:border-amber-900/50">
+    <div className={`fixed inset-0 z-50 ${isMobileMenuOpen ? '' : 'pointer-events-none invisible'}`}>
+      <button
+        type="button"
+        onClick={onCloseMobileMenu}
+        aria-label={isUrdu ? 'مینو بند کریں' : 'Close navigation menu'}
+        tabIndex={isMobileMenuOpen ? 0 : -1}
+        className={`absolute inset-0 h-full w-full bg-slate-950/40 backdrop-blur-[2px] transition-opacity duration-200 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
+      />
+      <nav
+        id="mobile-navigation"
+        aria-label={isUrdu ? 'مرکزی نیویگیشن' : 'Main navigation'}
+        aria-hidden={!isMobileMenuOpen}
+        className={`absolute top-0 flex h-full w-[min(23rem,88vw)] flex-col overflow-y-auto border-teal-100 bg-[#f8fbfa] p-4 shadow-2xl transition-transform duration-200 ${isUrdu ? 'left-0 border-r' : 'right-0 border-l'} ${isMobileMenuOpen ? 'translate-x-0' : isUrdu ? '-translate-x-full' : 'translate-x-full'}`}
+      >
+        <div className="mb-3 flex items-center justify-between border-b border-teal-100 pb-3">
+          <div className="flex items-center gap-3">
+            <img src="/favicon.svg" alt="" width="40" height="40" className="h-10 w-10 rounded-xl" />
             <div>
-              <p className="font-title text-lg font-bold text-emerald-950 dark:text-amber-200">
-                {language === 'ur' ? 'اسلام فار ایوری ون' : 'Islam for Everyone'}
+              <p className="font-title text-base font-bold text-slate-900">
+                {isUrdu ? 'اسلام فار ایوری ون' : 'Islam for Everyone'}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {language === 'ur' ? 'نیویگیشن' : 'Navigate to'}
-              </p>
+              <p className="text-xs text-slate-500">{isUrdu ? 'آپ کا اسلامی ساتھی' : 'Your daily companion'}</p>
             </div>
-            <button
-              type="button"
-              onClick={onCloseMobileMenu}
-              aria-label={language === 'ur' ? 'مینو بند کریں' : 'Close navigation menu'}
-              tabIndex={isMobileMenuOpen ? 0 : -1}
-              className="rounded-xl p-2 text-slate-600 hover:bg-emerald-50 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              <X aria-hidden="true" className="h-5 w-5" />
-            </button>
           </div>
-          <div className="flex flex-col gap-1">
-          {NAVIGATION_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const isActive = activePage === item.id;
-            const label = language === 'ur' ? item.labelUr : item.labelEn;
+          <button
+            type="button"
+            onClick={onCloseMobileMenu}
+            aria-label={isUrdu ? 'مینو بند کریں' : 'Close navigation menu'}
+            tabIndex={isMobileMenuOpen ? 0 : -1}
+            className="rounded-xl p-2 text-slate-600 transition-colors hover:bg-teal-50"
+          >
+            <span aria-hidden="true" className="text-2xl leading-none">×</span>
+          </button>
+        </div>
 
+        <div className="mb-2 flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 shadow-sm ring-1 ring-slate-100">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-50 text-sm font-bold text-teal-900">
+            {userProfile.name.slice(0, 1).toUpperCase()}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-slate-800">{userProfile.name}</span>
+            <span className="block truncate text-xs text-slate-500">
+              {userProfile.username ? `@${userProfile.username}` : userProfile.email || (isUrdu ? 'مقامی پروفائل' : 'Local profile')}
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={() => selectPage('account')}
+            aria-label={isUrdu ? 'اکاؤنٹ کھولیں' : 'Open account'}
+            tabIndex={isMobileMenuOpen ? 0 : -1}
+            className="ml-auto rounded-lg p-2 text-teal-800 hover:bg-teal-50"
+          >
+            <UserRound className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 space-y-1 overflow-y-auto py-1">
+          {NAVIGATION_ITEMS.map(({ id, icon: Icon, labelEn, labelUr }) => {
+            const selected = activePage === id;
             return (
               <button
-                key={item.id}
+                key={id}
                 type="button"
-                onClick={() => selectPage(item.id)}
+                onClick={() => selectPage(id)}
                 tabIndex={isMobileMenuOpen ? 0 : -1}
-                className={`flex min-h-12 items-center gap-3 rounded-xl px-3 py-2.5 text-left rtl:text-right transition-colors ${
-                  isActive
-                    ? 'bg-emerald-950 text-amber-200 shadow-sm'
-                    : 'text-slate-700 hover:bg-emerald-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                aria-current={selected ? 'page' : undefined}
+                className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left rtl:text-right transition-all active:scale-[0.99] ${
+                  selected
+                    ? 'bg-teal-800 text-white shadow-sm'
+                    : 'text-slate-700 hover:bg-teal-50 hover:text-teal-900'
                 }`}
               >
-                <Icon className={`h-5 w-5 shrink-0 ${isActive ? 'text-amber-300' : 'text-emerald-700 dark:text-cyan-300'}`} />
-                <span className={`text-sm font-semibold ${language === 'ur' ? 'font-nastaliq' : ''}`}>{label}</span>
-                {isActive && <span className="ml-auto rtl:mr-auto rtl:ml-0 h-2 w-2 rounded-full bg-amber-300" />}
+                <Icon className={`h-5 w-5 shrink-0 ${selected ? 'text-teal-100' : 'text-teal-800'}`} />
+                <span className={`text-sm font-semibold ${isUrdu ? 'font-nastaliq' : ''}`}>
+                  {isUrdu ? labelUr : labelEn}
+                </span>
+                {selected && <span className="ml-auto rtl:mr-auto rtl:ml-0 h-2 w-2 rounded-full bg-white" />}
               </button>
             );
           })}
+        </div>
+
+        <div className="mt-3 border-t border-teal-100 pt-3">
+          <button type="button" onClick={() => closeAndRun(() => setIsSearchOpen(true))} tabIndex={isMobileMenuOpen ? 0 : -1} className={utilityButtonClass}>
+            <Search className="h-4 w-4 text-teal-800" />{isUrdu ? 'تلاش کریں' : 'Search'}
+          </button>
+          <button type="button" onClick={() => closeAndRun(() => setIsBookmarksOpen(true))} tabIndex={isMobileMenuOpen ? 0 : -1} className={utilityButtonClass}>
+            <Bookmark className="h-4 w-4 text-teal-800" />{isUrdu ? 'محفوظ نشانیاں' : 'Bookmarks'}
+          </button>
+          <button type="button" onClick={() => closeAndRun(() => setIsDatasetModalOpen(true))} tabIndex={isMobileMenuOpen ? 0 : -1} className={utilityButtonClass}>
+            <Upload className="h-4 w-4 text-teal-800" />{isUrdu ? 'قرآن ڈیٹا درآمد کریں' : 'Import Quran data'}
+          </button>
+          <button type="button" onClick={() => closeAndRun(openGuide)} tabIndex={isMobileMenuOpen ? 0 : -1} className={utilityButtonClass}>
+            <HelpCircle className="h-4 w-4 text-teal-800" />{isUrdu ? 'ایپ کا رہنما ٹور' : 'Guided app tour'}
+          </button>
+          <div className="mt-2 flex items-center justify-between rounded-xl bg-white px-3 py-2 ring-1 ring-slate-100">
+            <span className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+              <Languages className="h-4 w-4 text-teal-800" />
+              {isUrdu ? 'زبان' : 'Language'}
+            </span>
+            <div className="flex gap-1 rounded-lg bg-slate-100 p-1">
+              <button type="button" onClick={() => setLanguage('en')} tabIndex={isMobileMenuOpen ? 0 : -1} aria-pressed={!isUrdu} className={`rounded-md px-2.5 py-1 text-xs font-bold ${!isUrdu ? 'bg-teal-800 text-white' : 'text-slate-600'}`}>EN</button>
+              <button type="button" onClick={() => setLanguage('ur')} tabIndex={isMobileMenuOpen ? 0 : -1} aria-pressed={isUrdu} className={`rounded-md px-2.5 py-1 text-xs font-bold ${isUrdu ? 'bg-teal-800 text-white' : 'text-slate-600'}`}>اردو</button>
+            </div>
           </div>
-        </nav>
-      </div>
-    </>
+          <a
+            href="https://github.com/Abdullah-subhan57/Islam-For-Everyone"
+            target="_blank"
+            rel="noreferrer"
+            tabIndex={isMobileMenuOpen ? 0 : -1}
+            className="mt-3 flex min-h-10 items-center justify-center gap-2 text-xs font-medium text-slate-500 transition-colors hover:text-teal-900"
+          >
+            <Github aria-hidden="true" className="h-4 w-4" />
+            {isUrdu ? 'GitHub پراجیکٹ' : 'GitHub project'}
+          </a>
+        </div>
+      </nav>
+    </div>
   );
 };

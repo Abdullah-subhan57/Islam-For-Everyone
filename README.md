@@ -41,27 +41,27 @@ This starts both Vite and the local assistant API. Open **[http://localhost:3000
 | # | Page / Feature | Highlights |
 |---|---|---|
 | **1** | **Home Dashboard** | Dynamic Verse & Hadith of the Day (randomize, play, copy, bookmark), live next prayer countdown, 8-pillar quick access grid, daily streak & reading goal tracker. |
-| **2** | **Holy Quran Reader** | 114 Surahs & 30 Juz, Urdu and English translations, and verse audio. Start a full-surah recitation and pause/resume it from the persistent player. |
+| **2** | **Holy Quran Reader** | 114 Surahs & 30 Juz, Urdu and English translations, and verse audio. Start a full-surah recitation and use media-session controls on supported lock screens. |
 | **3** | **Hadith Collections** | Six collections load Arabic, Urdu, and English editions on demand; filter by collection, chapter/topic, number, or text. Results are paginated, and unavailable grades are not guessed. |
 | **4** | **Prayer Times & Adhan** | Editable Fajr 05:40, Dhuhr 13:45, Asr 16:15, Maghrib 17:30, and Isha 19:30 defaults; per-account manual times, calculated-time option, optional GPS, and full Adhan audio. |
 | **5** | **Qibla Compass** | Uses browser-permitted live GPS to calculate the Kaaba bearing and distance, follows location updates, and gives live turn guidance when the phone compass sensor is available. |
-| **6** | **Daily Duas (Hisn al-Muslim)** | Search and filter supplications, use repetition counters, listen with the browser's Arabic speech voice, and opt into morning/evening browser notifications while the app is open. |
+| **6** | **Daily Duas (Hisn al-Muslim)** | Search and filter supplications, use repetition counters, listen with the device's Arabic speech voice, and opt into morning/evening browser notifications while the app is open. |
 | **7** | **Digital Tasbih** | Counter, selected dhikr, laps, daily total, and lifetime count are saved locally and synced with an account when Supabase is configured. |
 | **8** | **Quiz & 99 Names of Allah** | Bilingual quiz, a saved completion badge, printable certificate, and the 99 Names gallery. |
 | **9** | **Islamic History** | The standard list of 25 prophets named in the Quran, the Rashidun caliphs, and historical caliphates/dynasties with bilingual summaries and milestones. |
 | **10** | **AI Assistant** | Bilingual server-side Gemini Q&A plus offline navigation actions for app pages and Quran/Adhan audio. Conversation memory is backed up locally and synced per account when configured. |
 | **11** | **Ibadat Guide** | Urdu/English step-by-step guides for Salah, fasting, Zakat, Hajj, Umrah, and Ghusl. Salah includes Arabic, transliteration, and translations for each prayer position. |
-| **12** | **Sign-in & Cloud Memory** | Optional Supabase Google OAuth and email-code verification, with row-level-security-protected account data and assistant memory sync. |
+| **12** | **Sign-in & Cloud Memory** | Optional Supabase Google OAuth and email-code verification, username profile, row-level-security-protected account data, and assistant memory sync. |
 
 ### Optional Google/email sign-in and cloud backup
 
-The app runs in local-device mode when Supabase is not configured. Profile, Salah, reading, Tasbih, bookmarks, and assistant progress are backed up in browser storage. Sign in with Supabase to sync across devices; offline changes are kept locally and restored before older cloud state is synced. Browser storage can still be removed by the user or browser, so account sync is required for a separate cloud copy.
+The app runs in local-device mode when Supabase is not configured. Profile, Salah, reading, Tasbih, bookmarks, and assistant progress are saved in browser/device storage. Sign in with Supabase to sync across devices; offline changes are kept locally and restored before older cloud state is synced. Local browser/app data can still be removed by the user or operating system, so configure Supabase cloud sync for a separate backup.
 
 To enable sign-in and account sync:
 
 1. Create a Supabase project and run [`supabase/schema.sql`](./supabase/schema.sql) in its SQL Editor. The table uses row-level security so each signed-in user can only read or update their own app state.
 2. In Supabase Authentication, enable Google and configure its provider credentials. Add your app URL to the allowed redirect URLs. The Google OAuth callback is `https://<project-ref>.supabase.co/auth/v1/callback`.
-3. Configure the Supabase email sign-in template to include the one-time token placeholder `{{ .Token }}` so users receive a verification code.
+3. Configure the Supabase email sign-in template to include the one-time token placeholder `{{ .Token }}` so users receive a verification code. New email accounts ask for a username before the code is sent; the username is stored in auth metadata and the app profile.
 4. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to `.env`, then restart the dev server. The anon key is public; never put a Supabase service-role key in frontend variables.
 
 Google client secrets and provider credentials belong in the Supabase dashboard, not in this repository or chat. Without these project/provider settings, the login screen cannot authenticate users.
@@ -70,7 +70,8 @@ Google client secrets and provider credentials belong in the Supabase dashboard,
 
 - Full Hadith editions are fetched from the public-domain [Hadith API dataset](https://github.com/fawazahmed0/hadith-api) only when a collection is selected. An internet connection is required; numbering and edition totals can vary between published editions.
 - The editable prayer-time defaults are the requested schedule (05:40, 13:45, 16:15, 17:30, 19:30). Users can save location-specific manual times or switch to local NOAA solar-position calculations using the selected location's IANA time zone, Karachi 18° Fajr/Isha angles, and Hanafi/Shafi Asr method. Local sighting adjustments and authority-specific offsets may differ.
-- Prayer and azkar notifications, and automatic Adhan playback, require the app to remain open and browser notifications to be allowed. Browsers do not permit a web page to set the operating system's notification ringtone.
+- On the web, prayer and azkar notifications require the app to remain open and browser notifications to be allowed. Capacitor Android/iOS builds can schedule native prayer reminders for the next six days; the schedule is refreshed when the app opens or the user's prayer settings change. Android may ask the user to allow exact alarms; if declined, reminder delivery can be delayed. Reminders are notifications only and do not play full Adhan audio automatically. Browsers and standard local notifications do not let a web page select the operating system's notification ringtone.
+- Quran audio uses the Capacitor media-session integration for native media controls and lock-screen metadata. Background playback varies by OS, device, battery settings, and audio source; verify it on a physical Android device with the screen locked. iOS native builds require macOS/Xcode, and this repository currently has no configured iOS project.
 - Live Qibla GPS works on HTTPS (or localhost) after the user grants location permission. Live turn-by-turn compass guidance also requires a supported device orientation sensor and permission; otherwise, the app displays the bearing and cardinal direction.
 - Dua playback uses the speech voices installed in the user's browser/device; it is not a recorded Qari recitation.
 - Local assistant actions (opening Quran, Hadith, prayer, Qibla, Tasbih, calendar, quiz, history, 99 Names, account, dua, and Ibadat pages, plus Quran/Adhan audio) do not require an AI key. General AI answers send conversation context to Google Gemini. Configure `GEMINI_API_KEY` only in the server environment or a local `.env` file; the browser never receives the key. Do not submit sensitive personal information. AI responses are general guidance, not verified citations or religious rulings.
@@ -99,13 +100,28 @@ One straightforward option is a Node web service on Render; the Express server h
 
 The app works without Supabase, but then progress remains in that user's browser storage. AI answers need a Gemini key; local page navigation and other local actions do not. Check Render's current free-tier limits before choosing it for a public service; a free instance may sleep when unused.
 
+### Build and release the Android app
+
+Use a current Android Studio installation with its bundled JDK and Android SDK:
+
+1. Install dependencies and build/sync the web app and Capacitor plugins:
+   ```bash
+   npm install
+   npm run cap:sync:android
+   ```
+   `npm run cap:sync:android` runs the Vite production build and copies the result and native plugin configuration into Android.
+2. Open the native project with `npm run android:open` (or open the `android` folder in Android Studio), allow Gradle sync to finish, then run the app on an emulator or physical Android device.
+3. Test email verification, account/cloud sync, prayer reminder permission/scheduling, and Quran playback with the screen locked on a physical device. Android notification and media-session behavior can vary by OS and manufacturer.
+4. In Android Studio, choose **Build → Generate Signed Bundle / APK**, select **Android App Bundle (AAB)** for Google Play, create or select a signing key, and keep the keystore/passwords private and backed up. Do not commit signing credentials or `.env` files.
+5. Upload the signed AAB through Google Play Console's testing track before production release. Set production Supabase redirect URLs and server-side `GEMINI_API_KEY` in the hosting environment.
+
+For iOS, use a Mac with Xcode and add/configure the Capacitor iOS platform before building and signing. Desktop packaging is not configured in this repository; use a dedicated Capacitor-compatible desktop runtime if desktop binaries are required.
+
 ---
 
-## 🎨 Dual Theme & Dual Language (i18n)
+## 🎨 Light Theme & Dual Language (i18n)
 
-- **Dual Theme Engine**:
-  - **Emerald Gold Light**: Warm parchment (`#FDFBF7`), deep emerald green (`#064E3B`), and antique gold (`#D97706`).
-  - **Midnight Obsidian Dark**: Deep charcoal (`#0F172A`), muted emerald (`#047857`), and warm gold (`#F59E0B`).
+- **Light visual design**: Misty white surfaces, deep teal navigation, and bright turquoise accents.
 - **Instant Language Switcher (UR / EN)**:
   - English (LTR) with clean typography.
   - Urdu (RTL) with beautiful `Noto Nastaliq Urdu` typography.

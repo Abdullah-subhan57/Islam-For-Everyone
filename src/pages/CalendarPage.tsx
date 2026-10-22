@@ -36,38 +36,38 @@ export const CalendarPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-24">
       {/* Calendar Hero Header */}
-      <div className="rounded-3xl bg-gradient-to-br from-emerald-950 via-teal-950 to-emerald-900 text-white p-6 sm:p-8 shadow-xl border border-amber-400/30">
+      <div className="rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-teal-50 text-slate-900 p-6 sm:p-8 shadow-sm border border-emerald-200">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-800/80 text-amber-300 text-xs font-semibold border border-amber-400/30">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-emerald-800 text-xs font-semibold border border-emerald-200">
               <CalendarIcon className="w-3.5 h-3.5" />
               <span>{language === 'ur' ? 'دوہرا ہجری و عیسوی تقویم' : 'Dual Hijri & Gregorian Calendar'}</span>
             </div>
-            <h2 className="font-title text-2xl sm:text-3xl font-extrabold text-amber-200">
+            <h2 className="font-title text-2xl sm:text-3xl font-extrabold text-emerald-950">
               {language === 'ur'
                 ? `${HIJRI_MONTHS_UR[selectedMonth - 1]} ${currentHijri.year} ھ`
                 : `${HIJRI_MONTHS_EN[selectedMonth - 1]} ${currentHijri.year} AH`}
             </h2>
-            <p className="text-xs sm:text-sm text-emerald-200/90 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               Explore key historical milestones, prophetic battles, treaty pacts, and blessed Islamic festivals.
             </p>
           </div>
 
           {/* Month Navigator Controls */}
-          <div className="flex items-center gap-2 bg-emerald-900/80 p-1.5 rounded-2xl border border-amber-400/30">
+          <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-emerald-200">
             <button
               onClick={() => setSelectedMonth((m) => (m === 1 ? 12 : m - 1))}
-              className="p-2 rounded-xl text-amber-300 hover:bg-emerald-800 transition-colors"
+              className="p-2 rounded-xl text-emerald-800 hover:bg-emerald-50 transition-colors"
               title="Previous Month"
             >
               <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
             </button>
-            <span className="font-bold text-xs px-3 text-amber-200">
+            <span className="font-bold text-xs px-3 text-emerald-950">
               {language === 'ur' ? HIJRI_MONTHS_UR[selectedMonth - 1] : HIJRI_MONTHS_EN[selectedMonth - 1]}
             </span>
             <button
               onClick={() => setSelectedMonth((m) => (m === 12 ? 1 : m + 1))}
-              className="p-2 rounded-xl text-amber-300 hover:bg-emerald-800 transition-colors"
+              className="p-2 rounded-xl text-emerald-800 hover:bg-emerald-50 transition-colors"
               title="Next Month"
             >
               <ChevronRight className="w-4 h-4 rtl:rotate-180" />

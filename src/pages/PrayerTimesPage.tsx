@@ -23,6 +23,11 @@ import {
   PrayerTimesService,
   MAJOR_CITIES
 } from '../services/prayerTimes';
+import {
+  cancelPrayerNotifications,
+  requestPrayerNotificationPermission,
+  schedulePrayerNotifications
+} from '../services/prayerNotifications';
 import { CityLocation, PrayerTimesData } from '../types';
 
 export const PrayerTimesPage: React.FC = () => {
@@ -155,6 +160,36 @@ export const PrayerTimesPage: React.FC = () => {
     }, { once: true });
   };
 
+  const handleTogglePrayerAlerts = async () => {
+    try {
+      if (userProfile.preAdhanNotification) {
+        await cancelPrayerNotifications();
+        updateUserProfile({ preAdhanNotification: false });
+        setAdhanError(language === 'ur' ? 'نماز کی یاد دہانیاں بند ہیں۔' : 'Prayer reminders are off.');
+        return;
+      }
+
+      const permissionGranted = await requestPrayerNotificationPermission();
+      if (!permissionGranted) {
+        setAdhanError(language === 'ur'
+          ? 'یاددہانی کے لیے نوٹیفکیشن کی اجازت درکار ہے۔'
+          : 'Allow notifications to enable prayer reminders.');
+        return;
+      }
+
+      const count = await schedulePrayerNotifications(userProfile, language);
+      updateUserProfile({ preAdhanNotification: true });
+      setAdhanError(language === 'ur'
+        ? `اگلے چھ دنوں کے لیے ${count} یاد دہانیاں مقرر ہو گئیں۔`
+        : `${count} reminders scheduled for the next six days.`);
+    } catch (error) {
+      console.error('Unable to update prayer reminders:', error);
+      setAdhanError(error instanceof Error
+        ? error.message
+        : 'Could not update prayer reminders.');
+    }
+  };
+
   const prayersList = [
     { name: t.fajr, rawName: 'Fajr', time: prayerData.fajr, icon: Sunrise, desc: 'Dawn Prayer' },
     { name: t.sunrise, rawName: 'Sunrise', time: prayerData.sunrise, icon: Sun, desc: 'Ishraq Time' },
@@ -168,19 +203,19 @@ export const PrayerTimesPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-24">
       {/* Top Hero Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-6 sm:p-8 shadow-xl border border-amber-400/30">
+      <div className="rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-teal-50 text-slate-900 p-6 sm:p-8 shadow-sm border border-emerald-200">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-800/80 text-amber-300 text-xs font-semibold border border-amber-400/30">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-emerald-800 text-xs font-semibold border border-emerald-200">
               <Clock className="w-3.5 h-3.5" />
               <span>
                 {t.nextPrayer}: {prayerData.nextPrayer} ({prayerData.timeRemainingFormatted} {t.timeRemaining})
               </span>
             </div>
-            <h2 className="font-title text-2xl sm:text-3xl font-extrabold text-amber-200">
+            <h2 className="font-title text-2xl sm:text-3xl font-extrabold text-emerald-950">
               {t.prayerTimes}
             </h2>
-            <p className="text-xs sm:text-sm text-emerald-200/90">
+            <p className="text-xs sm:text-sm text-slate-600">
               {language === 'ur' ? hijri.formattedUr : hijri.formattedEn} • {selectedCity.name} ({selectedCity.country})
             </p>
           </div>
@@ -188,27 +223,13 @@ export const PrayerTimesPage: React.FC = () => {
           {/* Action Buttons: Pre-Adhan Alert & Live Adhan */}
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => {
-                const nextVal = !userProfile.preAdhanNotification;
-                if (nextVal && 'Notification' in window) {
-                  void Notification.requestPermission().then((permission) => {
-                    updateUserProfile({ preAdhanNotification: permission === 'granted' });
-                    if (permission !== 'granted') {
-                      setAdhanError(language === 'ur'
-                        ? 'یاددہانی کے لیے نوٹیفکیشن کی اجازت درکار ہے۔'
-                        : 'Allow browser notifications to enable prayer reminders.');
-                    }
-                  });
-                } else {
-                  updateUserProfile({ preAdhanNotification: nextVal });
-                }
-              }}
+              onClick={() => { void handleTogglePrayerAlerts(); }}
               className={`px-4 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shadow-md ${
                 userProfile.preAdhanNotification
                   ? 'bg-amber-400 text-emerald-950 ring-2 ring-amber-300'
                   : 'bg-emerald-900/80 text-emerald-100 hover:bg-emerald-800/90 border border-emerald-700/60'
               }`}
-              title={language === 'ur' ? 'نماز سے ۱۵ منٹ قبل الرٹ الرٹ ٹون' : '15-Minute Pre-Adhan Ringtone Reminder'}
+              title={language === 'ur' ? 'نماز کے وقت اور ۱۵ منٹ پہلے یاد دہانی' : 'Prayer-time and 15-minute advance reminders'}
             >
               <Bell className={`w-4 h-4 ${userProfile.preAdhanNotification ? 'text-emerald-950 animate-bounce' : 'text-emerald-300'}`} />
               <span>
@@ -231,7 +252,7 @@ export const PrayerTimesPage: React.FC = () => {
             </button>
           </div>
         </div>
-        {adhanError && <p role="status" className="mt-3 text-xs text-amber-200">{adhanError}</p>}
+        {adhanError && <p role="status" className="mt-3 text-xs text-rose-700">{adhanError}</p>}
       </div>
 
       {/* City & Method Selector Bar */}
@@ -253,6 +274,7 @@ export const PrayerTimesPage: React.FC = () => {
                   timeZone: found.timezone
                 });
               }
+
             }}
             className="flex-1 md:w-48 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-slate-700 bg-stone-50 dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-200 focus:outline-hidden"
           >

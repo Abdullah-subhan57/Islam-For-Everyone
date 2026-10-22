@@ -11,7 +11,6 @@ import { AudioPlayerBar } from './components/AudioPlayerBar';
 import { SearchModal } from './components/SearchModal';
 import { BookmarksDrawer } from './components/BookmarksDrawer';
 import { DatasetModal } from './components/DatasetModal';
-import { OnboardingModal } from './components/OnboardingModal';
 import { GuidedTour } from './components/GuidedTour';
 import { TafseerModal } from './components/TafseerModal';
 import { SurahIntroModal } from './components/SurahIntroModal';
@@ -39,12 +38,19 @@ import { AIAssistantPage } from './pages/AIAssistantPage';
 import { IbadatGuidePage } from './pages/IbadatGuidePage';
 import { AuthGate } from './components/AuthGate';
 import { SplashScreen } from './components/SplashScreen';
+import { schedulePrayerNotifications } from './services/prayerNotifications';
+import { Capacitor } from '@capacitor/core';
 
 const PrayerAlertScheduler: React.FC = () => {
   const { userProfile } = useApp();
 
   useEffect(() => {
-    if (!userProfile.preAdhanNotification || !('Notification' in window) || Notification.permission !== 'granted') return;
+    if (
+      !userProfile.preAdhanNotification ||
+      Capacitor.isNativePlatform() ||
+      !('Notification' in window) ||
+      Notification.permission !== 'granted'
+    ) return;
 
     const city = MAJOR_CITIES.find((entry) => entry.name === userProfile.city);
     const latitude = userProfile.latitude ?? city?.latitude ?? MAJOR_CITIES[0].latitude;
@@ -317,8 +323,24 @@ const MainLayout: React.FC = () => {
     authConfigured,
     authReady,
     authDataReady,
-    authUser
+    authUser,
+    userProfile
   } = useApp();
+
+  useEffect(() => {
+    if (!userProfile.preAdhanNotification) return;
+    void schedulePrayerNotifications(userProfile, language).catch((error: unknown) => {
+      console.error('Unable to refresh scheduled prayer notifications:', error);
+    });
+  }, [
+    language,
+    userProfile.preAdhanNotification,
+    userProfile.city,
+    userProfile.latitude,
+    userProfile.longitude,
+    userProfile.timeZone,
+    userProfile.manualPrayerTimes
+  ]);
 
   if (showWelcome) {
     return (
@@ -385,7 +407,6 @@ const MainLayout: React.FC = () => {
       <SearchModal />
       <BookmarksDrawer />
       <DatasetModal />
-      <OnboardingModal />
       <GuidedTour />
 
       {/* Tafseer & Surah Intro Modals */}

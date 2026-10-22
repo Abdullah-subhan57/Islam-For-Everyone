@@ -210,10 +210,10 @@ export const QuranReader: React.FC = () => {
 
       {/* Surah Header Banner with Introduction Trigger */}
       {currentSurahData && (
-        <div className="relative rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-amber-100 p-6 sm:p-8 text-center shadow-xl border border-amber-400/30 overflow-hidden">
+        <div className="relative rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-teal-50 text-slate-900 p-6 sm:p-8 text-center shadow-sm border border-emerald-200 overflow-hidden">
           <div className="relative z-10 max-w-xl mx-auto space-y-3">
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="inline-block px-3 py-1 rounded-full bg-emerald-800/80 text-amber-300 text-xs font-semibold tracking-widest uppercase border border-amber-400/30">
+              <span className="inline-block px-3 py-1 rounded-full bg-white text-emerald-800 text-xs font-semibold tracking-widest uppercase border border-emerald-200">
                 {currentSurahData.revelationType === 'Meccan' ? t.meccan : t.medinan} • {currentSurahData.numberOfAyahs} {t.ayahs} • Juz {currentSurahData.juzStart}
               </span>
 
@@ -236,7 +236,7 @@ export const QuranReader: React.FC = () => {
                     playSurah(selectedSurahNum, currentSurahData.ayahs);
                   }
                 }}
-                className="px-3 py-1 rounded-full bg-emerald-700 hover:bg-emerald-600 text-amber-100 font-bold text-xs flex items-center gap-1.5 border border-amber-300/30 transition-transform active:scale-95"
+                className="px-3 py-1 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 border border-emerald-300 transition-transform active:scale-95"
                 title={audioState.queuedSurahNum === selectedSurahNum && audioState.isPlaying ? t.pause : t.play}
               >
                 {audioState.queuedSurahNum === selectedSurahNum && audioState.isPlaying

@@ -396,16 +396,16 @@ export const IbadatGuidePage: React.FC = () => {
 
   return (
     <section className="mx-auto max-w-5xl space-y-6 pb-24">
-      <header className="rounded-3xl border border-amber-300/50 bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 p-6 text-white shadow-xl sm:p-8">
+      <header className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6 text-slate-900 shadow-sm sm:p-8">
         <div className={`flex items-center gap-3 ${isUrdu ? 'flex-row-reverse text-right' : ''}`}>
-          <div className="rounded-2xl bg-amber-400/15 p-3 text-amber-300">
+          <div className="rounded-2xl bg-emerald-100 p-3 text-emerald-800">
             <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h2 className={`text-2xl font-bold text-amber-200 ${isUrdu ? 'font-nastaliq' : ''}`}>
+            <h2 className={`text-2xl font-bold text-emerald-950 ${isUrdu ? 'font-nastaliq' : ''}`}>
               {isUrdu ? 'عبادات کی مرحلہ وار رہنمائی' : 'Step-by-step Ibadat guide'}
             </h2>
-            <p className="mt-1 text-sm text-emerald-100/85">
+            <p className="mt-1 text-sm text-slate-600">
               {isUrdu
                 ? 'بنیادی رہنمائی اور مستند دعائیں؛ فقہی اختلافات میں اپنے معتبر عالم سے رجوع کریں۔'
                 : 'Practical introductions and sourced supplications. Consult a trusted scholar for rulings and differences.'}
