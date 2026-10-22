@@ -1,7 +1,7 @@
 # Islam 360 Ultimate — Islam for Everyone
 ### Comprehensive Islamic Knowledge, Holy Quran & Hadith Portal
 
-A production-ready Islamic Application inspired by **Islam 360**, built with **React**, **TypeScript**, and **Tailwind CSS**, featuring traditional **Ottoman & Andalusian** era aesthetics blended with a modern interface.
+A production-ready Islamic Application inspired by **Islam 360**, built with **React**, **TypeScript**, and **Tailwind CSS**, featuring responsive mobile navigation and a modern navy-and-turquoise palette inspired by traditional Islamic design.
 
 ---
 

@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+@theme {
+  --color-emerald-50: #eff6ff;
+  --color-emerald-100: #dbeafe;
+  --color-emerald-200: #bfdbfe;
+  --color-emerald-300: #93c5fd;
+  --color-emerald-400: #60a5fa;
+  --color-emerald-500: #3b82f6;
+  --color-emerald-600: #2563eb;
+  --color-emerald-700: #1d4ed8;
+  --color-emerald-800: #1e40af;
+  --color-emerald-850: #173b69;
+  --color-emerald-900: #153e75;
+  --color-emerald-950: #0b1f3a;
+  --color-amber-50: #ecfeff;
+  --color-amber-100: #cffafe;
+  --color-amber-200: #a5f3fc;
+  --color-amber-300: #67e8f9;
+  --color-amber-400: #22d3ee;
+  --color-amber-500: #06b6d4;
+  --color-amber-600: #0891b2;
+  --color-amber-700: #0e7490;
+  --color-amber-800: #155e75;
+  --color-amber-850: #124e63;
+  --color-amber-900: #164e63;
+  --color-amber-950: #083344;
+}
+
 @layer base {
   :root {
     --font-quran: 'Scheherazade New', 'Amiri', serif;
@@ -29,13 +56,13 @@
 
 /* Subtle Geometric Pattern */
 .bg-arabesque-light {
-  background-color: #faf9f6;
-  background-image: radial-gradient(ellipse at top, rgba(16, 94, 72, 0.055), transparent 58%);
+  background-color: #f7fbff;
+  background-image: radial-gradient(ellipse at top, rgba(14, 116, 144, 0.08), transparent 58%);
 }
 
 .bg-arabesque-dark {
-  background-color: #0F172A;
-  background-image: radial-gradient(ellipse at top, rgba(16, 94, 72, 0.13), transparent 58%);
+  background-color: #0b1424;
+  background-image: radial-gradient(ellipse at top, rgba(34, 211, 238, 0.09), transparent 58%);
 }
 
 html {
@@ -46,6 +73,7 @@ body {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 /* Custom scrollbar for Quran / Hadith reading */

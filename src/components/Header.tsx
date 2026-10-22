@@ -12,14 +12,21 @@ import {
   Upload,
   User,
   ShieldCheck,
-  Bot
+  Bot,
+  Menu,
+  X
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../services/translations';
 import { PrayerTimesService } from '../services/prayerTimes';
 import { AIAssistantPage } from '../pages/AIAssistantPage';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  isMobileMenuOpen: boolean;
+  onMobileMenuToggle: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ isMobileMenuOpen, onMobileMenuToggle }) => {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const {
     theme,
@@ -55,9 +62,9 @@ export const Header: React.FC = () => {
 
   return (
     <>
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md border-b transition-colors duration-300 bg-[#FDFBF7]/90 dark:bg-[#0B1120]/90 border-amber-200/60 dark:border-amber-900/40 shadow-xs">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md border-b transition-colors duration-300 bg-[#F7FBFF]/90 dark:bg-[#0B1424]/90 border-amber-200/60 dark:border-amber-900/40 shadow-xs">
       {/* Top Traditional Calligraphic & Hijri Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-teal-950 to-emerald-950 text-amber-200 text-xs px-4 py-1.5 flex flex-wrap items-center justify-between border-b border-amber-500/20">
+      <div className="bg-gradient-to-r from-emerald-950 via-blue-950 to-emerald-950 text-amber-200 text-xs px-4 py-1.5 flex flex-wrap items-center justify-between border-b border-amber-500/20">
         <div className="flex items-center gap-2">
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold tracking-wider text-amber-300">
@@ -86,23 +93,23 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Main App Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Logo with Andalusian Arch Crest */}
         <button
           onClick={() => setActivePage('home')}
-          className="flex items-center gap-3 text-left rtl:text-right cursor-pointer"
+          className="flex min-w-0 items-center gap-2 sm:gap-3 text-left rtl:text-right cursor-pointer"
         >
-          <div className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-emerald-950 text-amber-300 shadow-md border border-amber-400/60">
-            <Landmark className="h-6 w-6" strokeWidth={1.8} />
+          <div className="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-emerald-950 text-amber-300 shadow-md border border-amber-400/60">
+            <Landmark className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.8} />
             <Moon className="absolute -right-1 -top-1 h-3.5 w-3.5 fill-amber-300 text-amber-300" />
           </div>
 
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-title text-lg sm:text-xl font-black tracking-tight text-emerald-950 dark:text-amber-200">
+              <h1 className="max-w-[6.5rem] truncate font-title text-sm sm:max-w-none sm:text-xl font-black tracking-tight text-emerald-950 dark:text-amber-200 whitespace-nowrap">
                 {t.appName}
               </h1>
-              <span className="text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/40">
+              <span className="hidden sm:inline-flex text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/40">
                 Universal
               </span>
             </div>
@@ -127,21 +134,37 @@ export const Header: React.FC = () => {
         </button>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
+          <button
+            type="button"
+            onClick={onMobileMenuToggle}
+            className="lg:hidden inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-amber-200/60 text-emerald-900 transition-colors hover:bg-emerald-50 dark:border-amber-800/40 dark:text-amber-300 dark:hover:bg-slate-800"
+            title={isMobileMenuOpen
+              ? (language === 'ur' ? 'مینو بند کریں' : 'Close navigation menu')
+              : (language === 'ur' ? 'مینو کھولیں' : 'Open navigation menu')}
+            aria-label={isMobileMenuOpen
+              ? (language === 'ur' ? 'مینو بند کریں' : 'Close navigation menu')
+              : (language === 'ur' ? 'مینو کھولیں' : 'Open navigation menu')}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation"
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+
           {/* Mobile search trigger */}
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors"
+            className="md:hidden p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors"
             title={t.searchPlaceholder}
             aria-label="Search"
           >
-            <Search className="w-5 h-5 text-emerald-800 dark:text-amber-400" />
+            <Search className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-800 dark:text-amber-400" />
           </button>
 
           {/* Custom Quran JSON Dataset Importer */}
           <button
             onClick={() => setIsDatasetModalOpen(true)}
-            className="p-2 rounded-xl text-emerald-800 dark:text-amber-300 hover:bg-emerald-50 dark:hover:bg-slate-800 border border-amber-200/60 dark:border-amber-800/40 transition-colors flex items-center gap-1.5 text-xs font-medium"
+            className="hidden sm:flex p-2 rounded-xl text-emerald-800 dark:text-amber-300 hover:bg-emerald-50 dark:hover:bg-slate-800 border border-amber-200/60 dark:border-amber-800/40 transition-colors items-center gap-1.5 text-xs font-medium"
             title={t.importDataset}
           >
             <Upload className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -151,7 +174,7 @@ export const Header: React.FC = () => {
           {/* Bookmarks Drawer Trigger */}
           <button
             onClick={() => setIsBookmarksOpen(true)}
-            className="relative p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors"
+            className="relative hidden sm:inline-flex p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors"
             title={t.bookmarks}
             aria-label="Bookmarks"
           >
@@ -165,7 +188,7 @@ export const Header: React.FC = () => {
 
           <button
             onClick={() => setIsAssistantOpen(true)}
-            className="rounded-xl border border-amber-200/50 p-2 text-slate-700 transition-colors hover:bg-emerald-50 dark:border-amber-800/40 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="hidden sm:inline-flex rounded-xl border border-amber-200/50 p-2 text-slate-700 transition-colors hover:bg-emerald-50 dark:border-amber-800/40 dark:text-slate-200 dark:hover:bg-slate-800"
             title={language === 'ur' ? 'اے آئی معاون' : 'AI Assistant'}
             aria-label={language === 'ur' ? 'اے آئی معاون' : 'AI Assistant'}
           >
@@ -175,7 +198,7 @@ export const Header: React.FC = () => {
           {/* User Account & Salah Tracker Shortcut */}
           <button
             onClick={() => setActivePage('account')}
-            className="p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 border border-amber-200/50 dark:border-amber-800/40 transition-colors"
+            className="hidden sm:inline-flex p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 border border-amber-200/50 dark:border-amber-800/40 transition-colors"
             title="User Profile & Salah Tracker"
           >
             <User className="w-5 h-5 text-emerald-800 dark:text-amber-400" />
@@ -208,7 +231,7 @@ export const Header: React.FC = () => {
           {/* Theme Mode Toggle (Emerald Gold vs Midnight Dark) */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 border border-amber-200/50 dark:border-amber-800/40 transition-colors"
+            className="p-1.5 sm:p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 border border-amber-200/50 dark:border-amber-800/40 transition-colors"
             title={theme === 'midnight' ? 'Switch to Emerald Gold Light' : 'Switch to Midnight Dark'}
             aria-label="Toggle Theme"
           >

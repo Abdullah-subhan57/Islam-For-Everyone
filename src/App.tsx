@@ -292,6 +292,7 @@ const FloatingTasbih: React.FC = () => {
 };
 
 const MainLayout: React.FC = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const {
     activePage,
     theme,
@@ -317,13 +318,19 @@ const MainLayout: React.FC = () => {
       <StreakBreakScheduler />
       <AzkarReminderScheduler />
       {/* Global Top Navbar */}
-      <Header />
+      <Header
+        isMobileMenuOpen={isMobileMenuOpen}
+        onMobileMenuToggle={() => setIsMobileMenuOpen((open) => !open)}
+      />
 
       {/* Main Navigation Bar */}
-      <Navigation />
+      <Navigation
+        isMobileMenuOpen={isMobileMenuOpen}
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* Page Content Viewport */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6">
+      <main className="min-w-0 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
         {activePage === 'home' && <HomeDashboard />}
         {activePage === 'quran' && <QuranReader />}
         {activePage === 'hadith' && <HadithBrowser />}

@@ -27,7 +27,7 @@ export const AudioPlayerBar: React.FC = () => {
       : 1.0;
 
   return (
-    <aside aria-label="Audio Recitation Player" className="fixed bottom-16 lg:bottom-4 left-4 right-4 max-w-2xl mx-auto z-40 bg-emerald-950/95 text-amber-100 rounded-2xl p-3 border border-amber-400/30 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom duration-300">
+    <aside aria-label="Audio Recitation Player" className="fixed bottom-4 left-4 right-4 max-w-2xl mx-auto z-40 bg-emerald-950/95 text-amber-100 rounded-2xl p-3 border border-amber-400/30 shadow-2xl backdrop-blur-md transition-all animate-in slide-in-from-bottom duration-300">
       <div className="flex items-center justify-between gap-3">
         {/* Reciter & Verse Details */}
         <div className="flex items-center gap-3 overflow-hidden">
